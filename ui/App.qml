@@ -190,7 +190,7 @@ Item {
       time: s && app.screen !== "title" ? s.time : app.profile.time, depth: p ? p.y / reef.world.WORLD_H : 0,
       x: p ? p.x : 0, y: p ? p.y : 0, creatures: s ? s.creatures.length : 0, eats: app.eats, scatters: app.scatters,
       fade: s ? s.fade.phase : "none", hidden: p ? p.hidden : false, muted: app.profile.mute, track: music.curId, mood: music.mood,
-      held: Object.keys(input.held).length, camX: app.cam.x, seaScroll: view.seaScroll, closeRequests: app.closeRequests
+      held: Object.keys(input.held).length, camX: app.cam.x, seaScroll: view.seaScroll, blendFlat: view.blendFlat, mixB: view.mixB, closeRequests: app.closeRequests
     }
   }
   function keyPressed(key, text, mods, auto) {

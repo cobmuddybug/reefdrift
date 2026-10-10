@@ -54,6 +54,8 @@ Item {
   // render() republishes these every frame and the layers bind to them.
   property real camX: 0
   property real camY: 90
+  // true when a night-step blend is in progress and the fading layer is flattened to one texture (see the layer above)
+  readonly property bool blendFlat: mixB > 0 && steps.count === 4 && steps.itemAt(stepB) !== null && steps.itemAt(stepB).layer.enabled
   readonly property real seaScroll: root.camX - 160   // what the sea layer's scroll is bound to
   Repeater {
     id: steps
@@ -64,6 +66,11 @@ Item {
       anchors.fill: parent
       visible: s === root.stepA || (s === root.stepB && root.mixB > 0)
       opacity: s === root.stepB && s !== root.stepA ? root.mixB : 1
+      // flatten the fading layer first: without this, QtQuick applies the opacity to each image separately and the
+      // incoming layer's water paints over the outgoing layer's seabed before the seabed itself is blended
+      layer.enabled: opacity < 1
+      layer.smooth: false
+      layer.textureSize: Qt.size(320, 180)
       Image { source: Qt.resolvedUrl("../sprites/layers/water-" + layer.s + ".png"); smooth: false; y: -Math.round(root._top) }
       Image { visible: root._top < 300; source: Qt.resolvedUrl("../sprites/layers/shafts-" + layer.s + ".png"); smooth: false; x: -root.shaftX; y: -Math.round(root._top) }
       Image { visible: root._top < 300; source: Qt.resolvedUrl("../sprites/layers/shafts-" + layer.s + ".png"); smooth: false; x: 56 - root.shaftX; y: -Math.round(root._top) }

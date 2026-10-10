@@ -25,6 +25,12 @@ echo "$out2" | node -e '
 const s = JSON.parse(require("fs").readFileSync(0, "utf8"))
 if (Math.abs(s.seaScroll + 160 - s.camX) > 1) { console.error("sea layer is not following the camera: " + JSON.stringify({ camX: s.camX, seaScroll: s.seaScroll })); process.exit(1) }
 ' || { echo "SMOKE FAILED"; exit 1; }
+# a fading night step must be flattened, or the incoming water paints over the outgoing seabed (muddy sand at dusk)
+out4=$(TIMEOUT=60 dev/tools/run.sh "scene:10:0.5,w10,status,quit" | grep REEFDRIFT_STATUS | sed 's/.*REEFDRIFT_STATUS //')
+echo "$out4" | node -e '
+const s = JSON.parse(require("fs").readFileSync(0, "utf8"))
+if (!(s.mixB > 0 && s.blendFlat === true)) { console.error("dusk blend is not flattened: " + JSON.stringify(s)); process.exit(1) }
+' || { echo "SMOKE FAILED"; exit 1; }
 # Esc on the title screen asks the overlay to close (there must be a keyboard way out)
 out3=$(TIMEOUT=60 dev/tools/run.sh "w10,k:Escape,w3,status,quit" | grep REEFDRIFT_STATUS | sed 's/.*REEFDRIFT_STATUS //')
 echo "$out3" | node -e '
