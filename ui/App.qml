@@ -194,6 +194,11 @@ Item {
     }
   }
   function keyPressed(key, text, mods, auto) {
+    // Alt+W closes the overlay from anywhere (closing pauses and saves a swim)
+    if (key === Qt.Key_W && (mods & Qt.AltModifier)) {
+      if (!auto) { app.closeRequests++; app.requestClose() }
+      return true
+    }
     if (auto) return input.action(key) !== ""
     return input.press(key)
   }

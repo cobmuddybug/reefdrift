@@ -37,4 +37,12 @@ echo "$out3" | node -e '
 const s = JSON.parse(require("fs").readFileSync(0, "utf8"))
 if (s.closeRequests !== 1) { console.error("Esc on the title did not request close: " + JSON.stringify(s)); process.exit(1) }
 ' || { echo "SMOKE FAILED"; exit 1; }
+# Alt+W closes the overlay from anywhere (title, swim, pause) and must not also swim up
+out5=$(TIMEOUT=60 dev/tools/run.sh "w10,k:alt+W,w3,status,k:Return,w10,k:alt+W,w3,status,k:Escape,w3,k:alt+W,w3,status,quit" | grep REEFDRIFT_STATUS | sed 's/.*REEFDRIFT_STATUS //')
+echo "$out5" | node -e '
+const L = require("fs").readFileSync(0, "utf8").trim().split("\n").map(JSON.parse)
+if (L.length !== 3) { console.error("expected 3 status lines"); process.exit(1) }
+L.forEach((s, i) => { if (s.closeRequests !== i + 1) { console.error("Alt+W did not request close (" + ["title", "swim", "pause"][i] + "): " + JSON.stringify(s)); process.exit(1) } })
+if (L[1].screen !== "swim" || L[2].screen !== "pause") { console.error("Alt+W changed the screen: " + JSON.stringify(L)); process.exit(1) }
+' || { echo "SMOKE FAILED"; exit 1; }
 echo "smoke ok"

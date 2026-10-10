@@ -30,6 +30,7 @@ omarchy-shell shell toggle io.github.cobmuddybug.reefdrift '{}'
 | Space / right-click | flick: a short burst, then a pause of about a second |
 | Esc | pause (also saves); on the title screen, close |
 | M | mute |
+| Alt+W | close the overlay from anywhere (a swim is paused and saved) |
 
 - Creatures **smaller than you** (under 85% of your size) are food. They shimmer now and then.
 - Any fish **bigger than 120% of your size** can hurt you. One that is near carries a slow dark ring, and a ripple

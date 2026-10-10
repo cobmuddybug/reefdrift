@@ -5,7 +5,7 @@ import Quickshell
 // Runs the game in a plain window, outside the shell: `make dev`.
 // Headless checks: REEFDRIFT_SCRIPT is a comma list of steps, one per tick (40 ms):
 //   w / w20         wait one / twenty ticks
-//   k:Right         tap a key (press, release next tick)     d:Right / u:Right  hold / let go
+//   k:Right         tap a key (press, release next tick; k:alt+W for a modified key)     d:Right / u:Right  hold / let go
 //   ff:SECS         run SECS of game time at once with the bot swimming
 //   blur            what losing focus does (clear held keys)
 //   scene:R:T       a swim at radius R, time of day T
@@ -58,7 +58,7 @@ Window {
       var m = s.match(/^w(\d*)$/)
       if (m) { win.wait = m[1] ? Number(m[1]) - 1 : 0; return }
       var i = s.indexOf(":"), op = i < 0 ? s : s.slice(0, i), arg = i < 0 ? "" : s.slice(i + 1)
-      if (op === "k") { var k = keyOf(arg); if (k !== undefined) { app.keyPressed(k, arg.length === 1 ? arg.toLowerCase() : "", 0, false); win.tapRelease.push(k) } }
+      if (op === "k") { var mods = 0, name = arg; if (name.indexOf("alt+") === 0) { mods = Qt.AltModifier; name = name.slice(4) } var k = keyOf(name); if (k !== undefined) { app.keyPressed(k, name.length === 1 ? name.toLowerCase() : "", mods, false); win.tapRelease.push(k) } }
       else if (op === "d") app.keyPressed(keyOf(arg), "", 0, false)
       else if (op === "u") app.keyReleased(keyOf(arg), false)
       else if (op === "go") app.go(arg)
