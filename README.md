@@ -19,6 +19,20 @@ In `~/.config/hypr/bindings.lua`, following the style of your other binds, point
 omarchy-shell shell toggle io.github.cobmuddybug.reefdrift '{}'
 ```
 
+To close it with SUPER+W like any window, override Omarchy's "Close window" bind so it closes the overlay while the
+game is up (Hyprland would otherwise close the window underneath it) and the active window otherwise:
+
+```lua
+hl.unbind("SUPER + W")
+o.bind("SUPER + W", "Close window", function()
+  if o.shell_succeeds([[hyprctl layers -j | grep -q '"namespace": "reefdrift"']]) then
+    hl.exec_cmd("omarchy-shell io.github.cobmuddybug.reefdrift close")
+  else
+    hl.dispatch(hl.dsp.window.close())
+  end
+end)
+```
+
 `make uninstall` removes it.
 
 ## Play
