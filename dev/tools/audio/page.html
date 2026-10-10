@@ -1,0 +1,44 @@
+<!doctype html><meta charset="utf-8"><title>bake</title>
+<script type="module">
+const SR = 44100
+let seed = 12345
+Math.random = () => { seed = (seed + 0x6d2b79f5) >>> 0; let t = seed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296 }
+
+let n = 0
+// Runs fn(modules) against a fresh audio.js instance bound to an offline context of `secs` seconds; returns a stereo WAV.
+async function render(secs, fn, globals = {}) {
+  Object.assign(globalThis, { __WASH: undefined, __WASHF: undefined }, globals)
+  const oac = new OfflineAudioContext(2, Math.ceil(SR * secs), SR)
+  Object.defineProperty(oac, 'state', { value: 'running' })
+  globalThis.AudioContext = class { constructor() { return oac } }
+  const A = await import('/web/audio.js?n=' + n++)
+  await fn(A)
+  const buf = await oac.startRendering()
+  return wav(buf)
+}
+function wav(buf) {
+  const ch = [buf.getChannelData(0), buf.getChannelData(1)], len = buf.length, out = new DataView(new ArrayBuffer(44 + len * 4))
+  const w = (o, s) => [...s].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)))
+  w(0, 'RIFF'); out.setUint32(4, 36 + len * 4, true); w(8, 'WAVEfmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true)
+  out.setUint32(24, SR, true); out.setUint32(28, SR * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); w(36, 'data'); out.setUint32(40, len * 4, true)
+  for (let i = 0; i < len; i++) for (let c = 0; c < 2; c++) out.setInt16(44 + (i * 2 + c) * 2, Math.max(-1, Math.min(1, ch[c][i])) * 32767, true)
+  return out.buffer
+}
+const post = (name, data) => fetch('/out/' + name, { method: 'POST', body: data })
+
+const jobs = await (await fetch('/jobs.json')).json()
+for (const j of jobs) {
+  let data
+  if (j.kind === 'sfx') data = await render(j.secs, (A) => { A.play(j.name, j.arg) })
+  else if (j.kind === 'bell') data = await render(j.secs, (A) => { A.__t.bell(A.__t.PENT[j.index]) })
+  else if (j.kind === 'music') data = await render(j.secs, async (A) => {
+    A.__t.startAmbience()
+    const M = await import('/web/music.js')
+    const p = M.prepare(j.id)
+    for (const note of p.notes) A.__t.pianoNote(note.freq, note.at, note.dur, note.gain * p.gain)
+  }, { __WASH: 0 })
+  else if (j.kind === 'wash') data = await render(j.secs, (A) => { A.__t.startAmbience() }, { __WASHF: j.freq })
+  await post(j.out, data)
+}
+await post('done', 'ok')
+</script>

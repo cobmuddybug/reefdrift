@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.cobmuddybug.reefdrift",
+  "name": "Reef Drift",
+  "version": "0.1.0",
+  "author": "Cob Muddybug",
+  "license": "MIT",
+  "keepLoaded": true,
+  "description": "A quiet pixel-art swim through the Great Barrier Reef: grow from a young wrasse by eating what is smaller, hide from what is bigger. No score, no game over.",
+  "kinds": ["bar-widget", "overlay"],
+  "entryPoints": { "barWidget": "BarWidget.qml", "overlay": "Overlay.qml" },
+  "barWidget": { "displayName": "Reef Drift", "description": "Click to play Reef Drift.", "category": "Fun", "allowMultiple": false, "defaultSection": "right" }
+}
