@@ -25,13 +25,21 @@ game is up (Hyprland would otherwise close the window underneath it) and the act
 ```lua
 hl.unbind("SUPER + W")
 o.bind("SUPER + W", "Close window", function()
-  if o.shell_succeeds([[hyprctl layers -j | grep -q '"namespace": "reefdrift"']]) then
+  local ok, up = pcall(function()
+    for _, layer in ipairs(hl.get_layers()) do
+      if layer.namespace == "reefdrift" then return true end
+    end
+    return false
+  end)
+  if ok and up then
     hl.exec_cmd("omarchy-shell io.github.cobmuddybug.reefdrift close")
   else
     hl.dispatch(hl.dsp.window.close())
   end
 end)
 ```
+
+Don't call `hyprctl` from inside a bind: it waits on the compositor, which is waiting on the bind, and everything freezes.
 
 `make uninstall` removes it.
 
